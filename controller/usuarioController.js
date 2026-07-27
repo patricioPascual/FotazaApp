@@ -9,14 +9,11 @@ import {Rol} from '../models/Rol.js';
 export async function registrarUsuario(req, res) {
     const { nombre, email, password ,password2} = req.body;
    
-   
     const validacion = validarUsuario({ nombre, email, password ,password2});
 
     if (validacion.success === false) {
-    
         const erroresPorCampo = validacion.error.flatten().fieldErrors;
 
-       
         return res.status(400).render('registro', { 
             errores: erroresPorCampo,
             datos: { nombre, email },  
@@ -24,7 +21,6 @@ export async function registrarUsuario(req, res) {
         });
     }
 
-   
     try {
         await crearUsuario(nombre, email, password);
         
@@ -34,23 +30,19 @@ export async function registrarUsuario(req, res) {
 
     } catch (error) {
        console.log("DETALLE DEL ERROR:", error); 
-        let errorEmail={} 
         let msjError = "Hubo un problema en el servidor.";
+        
         if (error.name === 'SequelizeUniqueConstraintError') {
-            msjError="Este correo ya está registrado."
-            errorEmail= {
-                email:["Este correo ya está registrado."]};
+            msjError = "Ya existe un registro con estos datos.";
         }
 
         return res.status(500).render('registro', {
-            errores:errorEmail ,
-            datos:{nombre,email},
-
+            errores: {},
+            datos: { nombre, email },
             alert: { status: 'error', text: msjError }
         });
     }
 }
-
 export async function autenticarUsuario(req, res) {
     const { email, password } = req.body;
 

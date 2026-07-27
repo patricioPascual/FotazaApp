@@ -21,7 +21,7 @@ Usuario.init(
     nombre: {
       type: DataTypes.STRING(100), 
       allowNull: false,
-      
+      unique:true
     },
     email: {
       type: DataTypes.STRING(50), 
