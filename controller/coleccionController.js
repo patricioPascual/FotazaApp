@@ -14,7 +14,7 @@ export async function agregarPublicacionACol(req, res) {
 
         let idFinalColeccion = idColeccion;
 
-        // Si eligió "nueva", creo la coleccion primero
+        // Si eligio "nueva", creo la coleccion primero
         if (idColeccion === 'nueva') {
             const nueva = await Coleccion.create({ 
                 nombre: nuevoNombre, 
@@ -36,7 +36,7 @@ export async function agregarPublicacionACol(req, res) {
             return res.redirect('/colecciones'); 
         }
 
-        // 2. Si no existe, procedoa insertarla
+        //  Si no existe, procedoa insertarla
         await ColeccionPublicacion.create({
             idcoleccion_fk: idFinalColeccion,
             idpublicacion_fk: idPublicacion
@@ -78,7 +78,7 @@ export async function verMisColecciones(req, res) {
             }]
         });
 
-        // logica reutilizable a cada coleccion
+        
         for (const col of colecciones) {
             await enriquecerPublicaciones(col.publicaciones, idUsuario);
         }
@@ -98,22 +98,21 @@ export async function verDetalleColeccion(req, res) {
         const { id } = req.params;
         const idUsuario = req.session.idusuario;
 
-        // 1. Verificar la coleccion
+        
         const coleccion = await Coleccion.findByPk(id);
         if (!coleccion || coleccion.idusuario_fk !== idUsuario) {
             return res.redirect('/colecciones');
         }
 
-        // 2. Busco solo los registros en la tabla intermedia
+        //  Busco solo los registros en la tabla intermedia
        
         const registros = await ColeccionPublicacion.findAll({
             where: { idcoleccion_fk: id }
         });
 
-        // 3. Extraer solo los IDs de las publicaciones
         const idsPublicaciones = registros.map(r => r.idpublicacion_fk);
 
-        // 4. Busco las publicaciones directamente en el modelo Publicacion
+        // Busco las publicaciones directamente en el modelo Publicacion
      
         let publicaciones = [];
         if (idsPublicaciones.length > 0) {
