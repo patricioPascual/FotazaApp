@@ -239,6 +239,11 @@ export async function eliminarPublicacion(req, res) {
         await sequelize.models.publicacion_etiqueta.destroy({
             where: { idpublicacion_fk: idpublicacion }
         });
+
+        await Foto.destroy({
+            where: { idpublicacion_fk: idpublicacion }
+        });
+
         await pub.destroy();
         res.redirect('/index');
     } catch (error) {
