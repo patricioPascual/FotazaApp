@@ -59,7 +59,7 @@ if (tipo === 'foto') {
 if (idUsuarioDestino) {
     await crearNotificacion('reporte', idusuario_fk, idUsuarioDestino, idreferencia);
 }
-        // contar reportes únicos por usuario para esta foto
+        
         if (tipo === 'foto') {
             const cantidadReportes = await Reporte.count({   //para que no traiga los desestimados
                 where: { tipo: 'foto', idreferencia, estado:'pendiente' },
@@ -68,10 +68,7 @@ if (idUsuarioDestino) {
             });
 
             if (cantidadReportes >= 3) {
-                // buscar la publicacion que contiene esta foto
-               /**  const foto = await Foto.findByPk(idreferencia, {
-                    include: [{ model: Publicacion }]
-                });*/
+               
                 await foto.publicacion.update({ enRevision: true });
             }
         }
@@ -199,14 +196,14 @@ export async function getReportesComentariosPropios(req, res) {
             where: { tipo: 'comentario', estado: 'pendiente' },
             include: [{
                 model: Comentario,
-                required: true, // Obligatorio: debe existir el comentario
+                required: true, 
                 include: [
                     {
                         model: Foto,
-                        required: true, // Obligatorio: el comentario debe estar en una foto
+                        required: true, 
                         include: [{
                             model: Publicacion,
-                            required: true, // Obligatorio: la foto debe pertenecer a una publicacion TUYA
+                            required: true, 
                             where: { idusuario_fk: idUsuarioLogueado }
                         }]
                     }, 
@@ -227,11 +224,11 @@ export async function getReportesComentariosPropios(req, res) {
 
 export async function borrarComentarioAutor(req, res) {
     try {
-        console.log("Parámetros recibidos:", req.params);
+       
         const idParam = req.params.idComentario;
         const idusuario = req.session.idusuario;
       
-        console.log("ID capturado desde params:", idParam);
+   
         const comentario = await Comentario.findByPk(idParam, {
             include: [{ model: Foto, include: [{ model: Publicacion }] }]
         });
@@ -243,6 +240,17 @@ export async function borrarComentarioAutor(req, res) {
         if (comentario.foto.publicacion.idusuario_fk !== idusuario) {
             return res.status(403).send('No tenés permiso.');
         }
+        await Reporte.update(
+            { estado: 'revisado' },
+            { 
+                where: { 
+                    idreferencia: idParam, 
+                    tipo: 'comentario',
+                    estado: 'pendiente' 
+                },
+                
+            }
+        );    
 
         await comentario.destroy();
         res.redirect('/reportes/mis-comentarios');
